@@ -17,3 +17,6 @@ class Shed(Base):
     rooms: Mapped[List["Room"]] = relationship(
         "Room", back_populates="shed", cascade="all, delete-orphan"
     )
+    shift_handovers: Mapped[List["ShiftHandover"]] = relationship(
+        "ShiftHandover", back_populates="shed", cascade="all, delete-orphan"
+    )

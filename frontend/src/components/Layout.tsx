@@ -1,6 +1,6 @@
 import { A, useNavigate } from '@solidjs/router'
 import { For, type ParentProps } from 'solid-js'
-import { clearToken } from '../api/client'
+import { clearToken, clearUser } from '../api/client'
 
 const links = [
   { href: '/', label: '看板', end: true },
@@ -37,6 +37,7 @@ export default function Layout(props: ParentProps) {
           class="logout-btn"
           onClick={() => {
             clearToken()
+            clearUser()
             navigate('/login')
           }}
         >

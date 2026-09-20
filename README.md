@@ -48,12 +48,28 @@ docker compose up --build
 4. **ClimateLog 环境记录**：`roomId`、`recordedAt`、`tempC`、`humidityPct`、`co2Ppm`、`notes`；`humidityPct ∈ [1,100]`，否则 **400**
 5. **FlushHarvest 采收**：`roomId`、`harvestedAt`、`flushNo(≥1)`、`weightKg`、`grade(A|B|C)`、`operatorName`；`weightKg > 0`，否则 **400**
 6. **Dashboard**：`shedTotal`、`fruitingRoomCount`、`climateLast24h`、`harvestKgLast7d`
+7. **ShiftHandover 交接班口令**：`shedId`、`workDate`、`phrase`、`handedBy`、`takenBy`、`closedAt(可空)`
 
 各实体 API：`GET/POST` 列表与创建、`DELETE` 按 ID 删除。
+
+## 交接班口令（ShiftHandover）
+
+- **归日**：按东八区（UTC+8）自然日归日，`workDate` 由服务端取当日日期；不设三班分钟表，也不按潮次切班。
+- **唯一**：同棚同日仅一张交接；当日再开返回 **409**，响应体带 `existingId`（已有交接的 id）。
+- **口令**：`phrase` 去掉首尾空白后长度须为 **4–12** 字，否则 **400**；入库保存去空白后的口令。
+- **人员**：`handedBy` 与 `takenBy` 不得是同一个登录名，否则 **400**。
+- **权限**：
+  - 开交接 `POST /api/shift-handovers`：`admin` 与 `fruiter` 均可（登录即可）。
+  - 关交接 `POST /api/shift-handovers/:id/close`：**仅 admin**；其他角色 **403**。重复关闭 **400**，记录不存在 **404**。
+- **未关限制**：只要该棚存在 `closedAt` 为空的交接，其下 Room 的 `status` 不准写成 `fruiting`（`POST /api/rooms` 返回 **409**）；关闭之后才放行。
+- **计数一致**：`GET /api/sheds` 每行带 `openHandover`（该棚未关交接数），`GET /api/shift-handovers/open-check` 返回 `{"total": N}`；两处共用同一计数逻辑，`total` 恒等于各行 `openHandover` 之和。
+- **种子数据**：初始化后保留一张未关闭的交接（首个菇房，口令「晨露满棚」）。
 
 ## 前端页面
 
 Login · Dashboard · Sheds · Rooms · ClimateLogs · FlushHarvests（侧边栏布局）
+
+Sheds 页内开交接班、展示各棚未关口令并提供关闭（关闭按钮仅 admin 可见）；Rooms 页在所选菇房有未关交接且状态选 fruiting 时给出提示。
 
 ## 本地开发（可选）
 

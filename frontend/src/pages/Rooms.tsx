@@ -1,5 +1,5 @@
 import { createSignal, onMount } from 'solid-js'
-import { For } from 'solid-js'
+import { For, Show } from 'solid-js'
 import { api } from '../api/client'
 import type { Room, RoomStatus, Shed } from '../types'
 
@@ -67,6 +67,11 @@ export default function Rooms() {
     return `badge ${status}`
   }
 
+  function selectedShedHasOpenHandover() {
+    const shed = sheds().find((s) => s.id === Number(form().shedId))
+    return (shed?.openHandover ?? 0) > 0
+  }
+
   return (
     <div>
       <header class="page-header">
@@ -129,6 +134,11 @@ export default function Rooms() {
         <button type="submit" class="btn primary">
           新增出菇室
         </button>
+        <Show when={form().status === 'fruiting' && selectedShedHasOpenHandover()}>
+          <p class="muted span-2">
+            该菇房存在未关闭的交接班口令，关闭前不可新增 fruiting 状态出菇室。
+          </p>
+        </Show>
       </form>
 
       <div class="table-wrap">

@@ -12,3 +12,4 @@ class ShedOutSchema(Schema):
     name = fields.Str()
     location = fields.Str()
     notes = fields.Str(allow_none=True)
+    open_handover = fields.Int(data_key="openHandover")

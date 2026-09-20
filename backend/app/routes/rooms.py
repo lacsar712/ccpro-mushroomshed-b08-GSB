@@ -7,7 +7,7 @@ from app.database import SessionLocal
 from app.models.room import Room
 from app.models.shed import Shed
 from app.schemas.room import RoomCreateSchema, RoomOutSchema
-from app.utils import validation_error_response
+from app.utils import shed_has_open_handover, validation_error_response
 
 bp = Blueprint("rooms", __name__, url_prefix="/api/rooms")
 
@@ -43,6 +43,15 @@ def create_room():
         shed = db.query(Shed).filter(Shed.id == data["shed_id"]).first()
         if not shed:
             return jsonify({"detail": "菇房不存在"}), 400
+        if data["status"] == "fruiting" and shed_has_open_handover(db, shed.id):
+            return (
+                jsonify(
+                    {
+                        "detail": "该菇房存在未关闭的交接班口令，出菇室状态不可写为 fruiting；请先由场长关闭交接"
+                    }
+                ),
+                409,
+            )
         item = Room(
             shed_id=data["shed_id"],
             room_code=data["room_code"],

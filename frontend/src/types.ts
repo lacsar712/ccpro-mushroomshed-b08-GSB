@@ -6,6 +6,17 @@ export interface Shed {
   name: string
   location: string
   notes?: string | null
+  openHandover: number
+}
+
+export interface ShiftHandover {
+  id: number
+  shedId: number
+  workDate: string
+  phrase: string
+  handedBy: string
+  takenBy: string
+  closedAt?: string | null
 }
 
 export interface Room {

@@ -294,6 +294,20 @@ th {
   color: var(--mushroom-brown);
 }
 
+.badge.handover {
+  background: #fff3e0;
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.handover-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 2px 0;
+}
+
 .login-page {
   min-height: 100vh;
   display: grid;
