@@ -294,6 +294,13 @@ th {
   color: var(--mushroom-brown);
 }
 
+.handover-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .login-page {
   min-height: 100vh;
   display: grid;

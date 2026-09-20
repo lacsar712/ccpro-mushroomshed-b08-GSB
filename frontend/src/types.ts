@@ -1,11 +1,29 @@
 export type RoomStatus = 'fruiting' | 'idle' | 'sanitize'
 export type HarvestGrade = 'A' | 'B' | 'C'
 
+export interface CurrentUser {
+  id: number
+  username: string
+  role: string
+  displayName: string
+}
+
+export interface ShiftHandover {
+  id: number
+  shedId: number
+  workDate: string
+  phrase: string
+  handedBy: string
+  takenBy: string
+  closedAt?: string | null
+}
+
 export interface Shed {
   id: number
   name: string
   location: string
   notes?: string | null
+  openHandover?: ShiftHandover | null
 }
 
 export interface Room {

@@ -6,7 +6,9 @@ from app.models.climate_log import ClimateLog
 from app.models.flush_harvest import FlushHarvest
 from app.models.room import Room
 from app.models.shed import Shed
+from app.models.shift_handover import ShiftHandover
 from app.models.user import User
+from app.utils import workday_today
 
 
 def seed() -> None:
@@ -76,6 +78,18 @@ def seed() -> None:
             db.add_all([r1, r2, r3, r4])
             db.flush()
 
+            # 交接班口令：留一张未关闭（松木岭一号菇房）
+            db.add(
+                ShiftHandover(
+                    shed_id=s1.id,
+                    work_date=workday_today(),
+                    phrase="松针落筐",
+                    handed_by="fruiter",
+                    taken_by="admin",
+                    closed_at=None,
+                )
+            )
+
             now = datetime.now(timezone.utc)
             db.add_all(
                 [
@@ -141,6 +155,23 @@ def seed() -> None:
             print("Seed data inserted.")
         else:
             print("Seed skipped (data exists).")
+
+        # 老库补齐：若还没有任何交接班口令，给首个菇房留一张未关闭的
+        if db.query(ShiftHandover).count() == 0:
+            first_shed = db.query(Shed).order_by(Shed.id).first()
+            if first_shed:
+                db.add(
+                    ShiftHandover(
+                        shed_id=first_shed.id,
+                        work_date=workday_today(),
+                        phrase="松针落筐",
+                        handed_by="fruiter",
+                        taken_by="admin",
+                        closed_at=None,
+                    )
+                )
+                db.commit()
+                print("Seed shift handover inserted.")
     finally:
         db.close()
 

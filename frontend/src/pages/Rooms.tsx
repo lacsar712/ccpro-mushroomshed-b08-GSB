@@ -53,6 +53,20 @@ export default function Rooms() {
     }
   }
 
+  async function changeStatus(id: number, status: RoomStatus) {
+    setError('')
+    try {
+      await api(`/api/rooms/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      })
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '状态更新失败')
+      await load()
+    }
+  }
+
   async function remove(id: number) {
     if (!confirm('确认删除该出菇室？')) return
     try {
@@ -154,7 +168,15 @@ export default function Rooms() {
                   <td>{r.species}</td>
                   <td>{r.capacityBags}</td>
                   <td>
-                    <span class={statusBadge(r.status)}>{r.status}</span>
+                    <span class={statusBadge(r.status)}>{r.status}</span>{' '}
+                    <select
+                      value={r.status}
+                      onChange={(e) =>
+                        changeStatus(r.id, e.currentTarget.value as RoomStatus)
+                      }
+                    >
+                      <For each={statuses}>{(s) => <option value={s}>{s}</option>}</For>
+                    </select>
                   </td>
                   <td>
                     <button type="button" class="btn ghost" onClick={() => remove(r.id)}>

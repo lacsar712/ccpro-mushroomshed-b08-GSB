@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from app.database import SessionLocal
 from app.models.shed import Shed
 from app.schemas.shed import ShedCreateSchema, ShedOutSchema
-from app.utils import validation_error_response
+from app.utils import open_handover_map, validation_error_response
 
 bp = Blueprint("sheds", __name__, url_prefix="/api/sheds")
 
@@ -21,6 +21,9 @@ def list_sheds():
     db = SessionLocal()
     try:
         rows = db.query(Shed).order_by(Shed.id).all()
+        opens = open_handover_map(db)
+        for shed in rows:
+            shed.open_handover = opens.get(shed.id)
         return jsonify(out_many.dump(rows))
     finally:
         db.close()
@@ -43,6 +46,7 @@ def create_shed():
             db.rollback()
             return jsonify({"detail": "菇房名称已存在"}), 400
         db.refresh(item)
+        item.open_handover = None
         return jsonify(out_schema.dump(item)), 201
     finally:
         db.close()
